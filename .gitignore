@@ -1,0 +1,18 @@
+# secrets
+.env
+
+# python build / cache
+__pycache__/
+*.egg-info/
+.pytest_cache/
+*.pyc
+.venv/
+
+# editor / os
+.DS_Store
+
+# orchestrator runtime state (only relevant if a target repo nests this folder)
+.orchestrator/
+
+# local scratch / design notes (kept out of the standalone repo)
+.misc_notes/

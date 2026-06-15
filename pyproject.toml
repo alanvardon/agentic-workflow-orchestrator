@@ -1,0 +1,27 @@
+[project]
+name = "agentic-workflow-orchestrator"
+version = "0.1.0"
+description = "Plain-English request → reviewed PR. A LangGraph workflow where deterministic Python owns the git spine and Claude owns the judgment (plan, implement, QA)."
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=0.40",
+    "langgraph>=0.2",
+    "langgraph-checkpoint-sqlite",
+    "langsmith",
+    "pydantic>=2",
+    "python-dotenv",
+    "aiosqlite",
+    "mcp",
+    "claude-agent-sdk",
+    "pyyaml>=6",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio", "ipython"]
+
+[project.scripts]
+implement-feature = "orchestrator.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
