@@ -207,3 +207,21 @@ def _stub_decompose(monkeypatch):
         )
 
     monkeypatch.setattr("orchestrator.workflow.decompose", _fake_decompose)
+
+
+@pytest.fixture(autouse=True)
+def _stub_working_tree_has_changes(monkeypatch):
+    """The pre-commit empty-diff guard (workflow.working_tree_has_changes) shells
+    out to git against the real REPO_ROOT — `dirty OR ahead-of-base`. So a
+    full-workflow test that expects a run to ship (status="succeeded") only passes
+    when the ambient tree happens to be dirty or ahead of base: green mid-work or on
+    a feature branch, but RED on a clean checkout (a fresh clone / CI on main).
+
+    Default it to True (there IS something to ship) so those tests are hermetic and
+    pass anywhere. Tests that exercise the no_changes / empty-diff path
+    (test_phase46_empty_diff) override this with their own monkeypatch, which wins
+    (it runs after this autouse fixture). The real probe is still covered directly
+    via git_ops.working_tree_has_changes against a temp repo in test_phase46."""
+    monkeypatch.setattr(
+        "orchestrator.workflow.working_tree_has_changes", lambda *a, **k: True
+    )
