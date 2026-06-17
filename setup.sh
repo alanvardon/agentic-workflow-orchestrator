@@ -6,11 +6,12 @@
 #
 # Two environment styles:
 #
-#   # 1. In-folder venv (default) — self-contained under orchestrator/.venv
+#   # 1. Just run it — if pyenv is installed it ASKS for a virtualenv name
+#   #    (press Enter to fall back to an in-folder orchestrator/.venv):
 #   ./orchestrator/setup.sh
 #
-#   # 2. pyenv virtualenv — reuse/create a named env in pyenv (matches a
-#   #    pyenv-managed workflow); created on PY_VERSION (default 3.12) if missing
+#   # 2. Skip the prompt by naming the env up front (scriptable / CI). The env
+#   #    is created on PY_VERSION (default 3.12) if it doesn't exist yet:
 #   PYENV_ENV=agentic-workflow-orchestrator ./orchestrator/setup.sh
 #   PYENV_ENV=myenv PY_VERSION=3.12.8 ./orchestrator/setup.sh
 #
@@ -19,6 +20,18 @@ set -euo pipefail
 
 ORCH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$ORCH_DIR")"
+
+# If PYENV_ENV wasn't passed, ask for it — but only when pyenv is installed AND
+# we have a terminal to read from. Type a virtualenv name to install into it, or
+# press Enter to fall back to the in-folder .venv. Non-interactive runs (no TTY,
+# e.g. CI or a piped install) skip the prompt and use the default, so they keep
+# working unattended.
+if [ -z "${PYENV_ENV:-}" ] && [ -t 0 ] && command -v pyenv >/dev/null 2>&1; then
+  existing="$(pyenv virtualenvs --bare 2>/dev/null | grep -v '/envs/' | tr '\n' ' ')"
+  [ -n "$existing" ] && echo "Existing pyenv virtualenvs: $existing"
+  printf 'Enter a pyenv virtualenv name to install into (blank = local .venv): '
+  read -r PYENV_ENV
+fi
 
 if [ -n "${PYENV_ENV:-}" ]; then
   # ── pyenv virtualenv route ─────────────────────────────────────────────────
